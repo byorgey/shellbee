@@ -1,0 +1,9 @@
+* (Prioritized?) feature list
+
+  + list goals + time needed, etc.
+  + enter data points
+  + vacation scheduling
+    + auto-stopping some roads
+    + ...or not (-> virtualized road, e.g. no work on Sunday --> more
+      work other days)
+  + timer with auto-reporting
