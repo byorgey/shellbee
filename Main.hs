@@ -47,21 +47,25 @@ shellbee = initialShellDescription
 
 goalsCmd :: Shellbee ()
 goalsCmd = do
-  cacheUser
-  with userCache $ \u ->
-    shellPutStrLn $ "Your goals:\n" ++ show u
+  withCached userCache getUserCache $ \u -> do
+    let Slugs goals = u ^. _Goals
+    shellPutStrLn $ "Your goals:\n" ++ unlines (map show goals)
+
 
 with l act = use l >>= maybe (return ()) act
 
-cacheUser :: Shellbee ()
-cacheUser = do
-  u <- use userCache
-  when (isNothing u) getUser
+withCached l getAct act = cache l getAct >> with l act
 
-getUser :: Shellbee ()
-getUser = do
-  mu <- runBee $ user (def & _GoalsFilter .~ Just Front)
-  userCache .= mu
+cache l g = do
+  c <- use l
+  when (isNothing c) g
+
+-- TODO: this needs to work a bit harder.  If Nothing, get all detail
+-- (but limit data points for speed of initial load?  Should test...)
+-- Otherwise, use last updated timestamp to make Diff call and replace
+-- updated goals.
+getUserCache :: Shellbee ()
+getUserCache = userCache <~ (runBee $ user (def & _GoalsFilter .~ Just Front))
 
 runBee :: Beeminder a -> Shellbee (Maybe a)
 runBee bee = do
